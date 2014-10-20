@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block head %}
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#iedb_entries').DataTable();
+    } );
+</script>
+{% endblock %}
+{% block title %}
+Search term: {{query}}
+{%endblock %}
+
+{% block body %}
+
+<h3>Antigen Source Organisms</h3>
+<table>
+<tr>
+    <th>Organism</th>
+    <th>Count</th>
+</tr>
+{% for organism, count in organism_counts %}
+<tr>
+    <td>{{organism}}</td>
+    <td>{{count}}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h3>Positive Assay Results</h3>
+
+<table id="iedb_entries">
+<tr>
+    <th>Epitope</th>
+    <th>MHC Allele</th>
+    <th># Positive</th>
+    <th># Negative</th>
+    <th>Source Organisms</th>
+
+</tr>
+
+{% for result in results %}
+<tr>
+    <td>{{result['Epitope Linear Sequence']}}</td>
+    <td>{{result['MHC Allele Name']}}</td>
+
+    <td>{{result['Positive Count']}}</td>
+    <td>{{result['Negative Count']}}</td>
+    <td>
+    {%for k,v in result['Organisms']%}
+    <div>
+        {{k}} ({{v}})
+    </div>
+    {%endfor %}
+    </td>
+</tr>
+{% endfor %}
+
+</table>
+{% endblock %}
