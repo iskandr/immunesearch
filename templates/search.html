@@ -1,59 +1,65 @@
 {% extends "layout.html" %}
-{% block head %}
-<script type="text/javascript">
-    $(document).ready( function () {
-        $('#iedb_entries').DataTable();
-    } );
-</script>
-{% endblock %}
-{% block title %}
-Search term: {{query}}
-{%endblock %}
 
 {% block body %}
+<h1>Immune Peptide Search</h1>
+ <form id="form">
+   <fieldset>
+    <ol>
 
-<h3>Antigen Source Organisms</h3>
-<table>
-<tr>
-    <th>Organism</th>
-    <th>Count</th>
-</tr>
-{% for organism, count in organism_counts %}
-<tr>
-    <td>{{organism}}</td>
-    <td>{{count}}</td>
-</tr>
-{% endfor %}
-</table>
+        <li>
+            <label for="query">
+                Peptide Substring
+            </label>
+            <input type="search"
+                   value="{{query}}"
+                   name="query"
+                   id="query">
+        </li>
+        <li>
+            <label for="offsetFromStart">Offset from Start of Peptide</label>
+            <input type="number"
+                   name="offsetFromStart"
+                   min=0
+                   max=99
+                   value={{offset_from_start | default(0)}}>
+        </li>
+        <li>
+            <label for="offsetFromEnd">Offset from End of Peptide</label>
+            <input type="number"
+                   name="offsetFromEnd"
+                   id="offsetFromEnd"
+                   min=0
+                   max=99
+                   value={{offset_from_end | default(0)}}>
+        </li>
 
-<h3>Positive Assay Results</h3>
+        <li>
+            <label for="minAssayCount">Minimum Assay Count</label>
+            <input type="number"
+                   name="minAssayCount"
+                   id="minAssayCount"
+                   min=0
+                   max=99
+                   value={{min_assay_count | default(1)}}>
+        </li>
 
-<table id="iedb_entries">
-<tr>
-    <th>Epitope</th>
-    <th>MHC Allele</th>
-    <th># Positive</th>
-    <th># Negative</th>
-    <th>Source Organisms</th>
-
-</tr>
-
-{% for result in results %}
-<tr>
-    <td>{{result['Epitope Linear Sequence']}}</td>
-    <td>{{result['MHC Allele Name']}}</td>
-
-    <td>{{result['Positive Count']}}</td>
-    <td>{{result['Negative Count']}}</td>
-    <td>
-    {%for k,v in result['Organisms']%}
-    <div>
-        {{k}} ({{v}})
-    </div>
-    {%endfor %}
-    </td>
-</tr>
-{% endfor %}
-
-</table>
+        <li>
+            <label for="minAssayCount">Minimum Fraction Positive Results</label>
+            <input type="number"
+                   name="minPositiveFraction"
+                   id="minPositiveFraction"
+                   min=0
+                   max=1
+                   value={{min_positive_fraction | default(0.5)}}
+                   step="0.01"
+                   size="2"
+                   maxlength="2">
+        </li>
+    </ol>
+    </fieldset>
+    <fieldset>
+        <input type="submit" id="submit" value="Search" action="/search/">
+    </fieldset>
+</form>
 {% endblock %}
+

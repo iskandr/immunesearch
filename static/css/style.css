@@ -1,10 +1,29 @@
 body {
-  padding: 11px;
-  font-family: "brandon-grotesque", verdana, helvetica, sans-serif;
+  padding: 2em;
+  font-family: Futura, Arial, sans-serif;
+  background: #ffffff;
+  color: #111111;
+
+}
+#positive_assay_results {
+  text-align: center;
+  float:right;
+  padding-top:3em;
+  padding-bottom:2em;
 }
 
-pre {
-  font-family: "inconsolata", monospace;
+#source_organisms {
+  float:right;
+  width:50em;
+}
+
+#summary {
+  float: left;
+  padding-left: 3em;
+  margin-top: -10em;
+  margin-bottom: 3em;
+  padding-bottom:  5em;
+
 }
 
 /* stolen gratuitously from
@@ -14,18 +33,19 @@ table {
   border: 1px solid #777;
   border-collapse: collapse;
   font-family: Futura, Arial, sans-serif;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+
 }
 
-caption {
-  font-size: larger; margin: 1em auto;
-}
 
 th, td {
   padding: .65em;
 }
 
 th, thead {
-  background: #000;
+  background: #111;
   border: 1px solid #000;
   color: #fff;
 }
@@ -34,11 +54,77 @@ tr:nth-child(odd) {
   background: #ccc;
 }
 
-tr:hover {
-  background: #aaa;
-}
-
 td {
   border-right: 1px solid #777;
   text-align: center;
 }
+
+
+caption {
+  font-size: larger; margin: 1em auto;
+}
+
+
+/* Form style copied and mofidied from
+  http://24ways.org/2009/have-a-field-day-with-html5-forms/
+*/
+form {
+  margin-top: 1em;
+  float: left;
+  background-color:  #558C89;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  padding: 0.1em;
+  width: 30em;
+}
+form li input {
+  float: right;
+}
+
+form fieldset {
+  border: none;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+form ol li {
+  background: #ECECEA;
+  /*
+  border-color: #838b83;
+  border-style: solid;
+  border-width: 2px;
+  */
+  /*
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  */
+  line-height: 25px;
+  list-style: none;
+  padding: 5px 10px;
+  margin-bottom: 2px;
+}
+
+input#query { font-size: 26pt; }
+
+form input[type="submit"] {
+  background: #484848;
+  border: none;
+  /*
+  -moz-border-radius: 20px;
+  -webkit-border-radius: 20px;
+  -khtml-border-radius: 20px;
+  border-radius: 20px;
+  */
+  color: #ffffff;
+  display: block;
+  font: 18px Georgia, "Times New Roman", Times, serif;
+  letter-spacing: 1px;
+  margin: auto;
+  padding: 7px 25px;
+  text-shadow: 0 1px 1px #000000;
+
+}
+
+

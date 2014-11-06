@@ -1,0 +1,89 @@
+{% extends "search.html" %}
+
+{% block head %}
+<script type="text/javascript">
+    $(document).ready( function () {
+
+        $('#iedb_entries').DataTable({
+            paging: false,
+            searching: false,
+            // order by # positive, % positive, epitope
+            "order": [[ 3, 'desc' ], [ 2, 'desc' ], [0, 'asc']],
+        });
+    } );
+</script>
+{% endblock %}
+
+{% block title %}
+Search term: {{query}}
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+
+
+<div id="source_organisms">
+
+<h3>Antigen Source Organisms</h3>
+
+<table>
+<tr>
+    <th>Organism</th>
+    <th>Count</th>
+</tr>
+{% for organism, count in organism_counts %}
+<tr>
+    <td>{{organism}}</td>
+    <td>{{count}}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+
+<!--
+<div id="summary">
+<div>Query: {{query}}<div>
+<div># Positive: {{n_pos}}</div>
+<div># Negative: {{n_neg}}</div>
+<div>Overall % Positive: {{total_percent_positive}}</div>
+</div>
+-->
+
+<div id="positive_assay_results">
+
+<h3>Positive Assay Results (grouped sequence and HLA allele)</h3>
+
+<table id="iedb_entries">
+<thead>
+    <tr>
+        <th>Epitope</th>
+        <th>MHC Allele</th>
+        <th>% Positive</th>
+        <th># Positive</th>
+        <th># Negative</th>
+        <th>Source Organisms</th>
+
+    </tr>
+</thead>
+
+<tbody>
+{% for result in peptide_mhc_entries %}
+<tr>
+    <td>{{result['Epitope Linear Sequence']}}</td>
+    <td>{{result['MHC Allele Name']}}</td>
+    <td>{{result['Positive Fraction']}}</td>
+    <td>{{result['Positive Count']}}</td>
+    <td>{{result['Negative Count']}}</td>
+    <td>
+    {%for k,v in result['Organisms']%}
+    <div>
+        {{k}} ({{v}})
+    </div>
+    {%endfor %}
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

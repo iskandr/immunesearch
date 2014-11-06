@@ -1,4 +1,5 @@
 from collections import Counter
+from os import environ
 
 from epitopes import iedb
 from flask import Flask
@@ -6,6 +7,7 @@ from flask import redirect, request, render_template, g
 import pandas as pd
 from werkzeug.contrib.cache import SimpleCache
 
+DEBUG = bool(environ.get("DEBUG", False))
 
 IEDB_COLS = [
     'Epitope Linear Sequence',
@@ -27,14 +29,13 @@ IEDB_COLS = [
 ]
 
 
-
 cache = SimpleCache()
 
 def iedb_tcell_entries():
     df = cache.get("df")
     if df is None:
         print "Loading IEDB T-Cell Entries"
-        df = iedb.load_tcell()
+        df = iedb.load_tcell(nrows=1000 if DEBUG else None)
         df = df[IEDB_COLS]
         cache.set("df", df)
     return df
@@ -43,20 +44,34 @@ def iedb_tcell_groupby_seq():
     df = cache.get("df_grouped")
     if df is None:
         print "Loading IEDB T-cell Groups"
-        df = iedb.load_tcell_values()
+        df = iedb.load_tcell_values(nrows=1000 if DEBUG else None)
         cache.set("df_grouped", df)
     return df
 
 app = Flask(__name__)
 
-@app.route('/search/<query>')
-def search(query):
+
+def get_arg(name, value):
+    converter = type(value)
+    v = converter(request.args.get(name, value))
+    try:
+        return converter(v)
+    except:
+        return value
+
+@app.route('/')
+def search():
+    query = request.args.get("query")
+    print "Query:", query
+    if query is None:
+        return render_template('search.html')
+
     df_grouped = iedb_tcell_groupby_seq()
 
-    min_assay_count = request.args.get('min_assay_count', 1)
-    min_positive_fraction = request.args.get('min_positive_fraction', 0.5)
-    offset_from_start = request.args.get('offset_from_start', 0)
-    offset_from_end = request.args.get('offset_from_end', 0)
+    min_assay_count = get_arg('minAssayCount', 1)
+    min_positive_fraction = get_arg('minPositiveFraction', 0.5)
+    offset_from_start = get_arg('offsetFromStart', 0)
+    offset_from_end = get_arg('offsetFromEndend', 0)
 
     # TODO: fuzzy match using BLOSUM matrix
     def matches(seq):
@@ -66,9 +81,15 @@ def search(query):
     query_mask &= df_grouped['count'] >= min_assay_count
 
     result_groups = df_grouped[query_mask]
+
     n = len(result_groups)
+
     pos_group_mask = result_groups['value'] > min_positive_fraction
-    n_pos = pos_group_mask.sum()
+    total_n_pos = pos_group_mask.sum()
+    total_n_neg = n - total_n_pos
+    total_percent_pos =  float(total_n_pos) / n
+
+
     pos_result_groups = result_groups[pos_group_mask]
 
     df_entries = iedb_tcell_entries()
@@ -88,8 +109,8 @@ def search(query):
 
     unique_organisms = merged_groups['Epitope Source Organism Name'].unique()
     organism_counter = Counter()
-    for k, organism_list in unique_organisms.iteritems():
 
+    for k, organism_list in unique_organisms.iteritems():
         for organism in organism_list:
             organism_counter[organism] += 1
 
@@ -109,23 +130,26 @@ def search(query):
         n_pos = tcell_response.str.startswith("Positive").sum()
         d['Positive Count'] = n_pos
         d['Negative Count'] = n - n_pos
-        d['Fraction'] = float(n_pos) / n
+        d['Positive Fraction'] = float(n_pos) / n
         organisms = g['Epitope Source Organism Name']
         organism_counts = organisms.value_counts().iteritems()
         d['Organisms'] = list(organism_counts)
         peptide_mhc_entries.append(d)
-    def peptide_mhc_sort_key(d):
-        fraction = d['Fraction']
-        count = d['Positive Count']
-        seq = d['Epitope Linear Sequence']
-        return (fraction, count, seq)
-    peptide_mhc_entries.sort(key=peptide_mhc_sort_key, reverse=True)
+
     return render_template(
-        'search.html',
+        'results.html',
+        n_pos=total_n_pos,
+        n_neg=total_n_neg,
+        total_percent_positive=total_percent_pos,
+        min_positive_fraction=min_positive_fraction,
+        min_assay_count=min_assay_count,
+        offset_from_start=offset_from_start,
+        offset_from_end=offset_from_end,
         query=query,
         organism_counts=organism_counter.most_common(),
         peptide_mhc_entries=peptide_mhc_entries)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    print "Debug:", DEBUG
+    app.run(debug=DEBUG)
